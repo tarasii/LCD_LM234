@@ -29,6 +29,7 @@
 #define CRSLC_PIN1 		GPIO_PIN_5
 #define CRSLC_PIN2 		GPIO_PIN_4
 
+#define LNLEN 50
 
 void Init_Ext_GLCD(void);
 
@@ -51,6 +52,7 @@ void PutByte(uint8_t gx, uint8_t y, uint8_t pb);
 void PutPixel(uint8_t gx, uint8_t gy);
 void drawLine(int x1, int y1, int x2, int y2);
 void Rectangle(int x1, int y1, int x2, int y2);
+uint8_t GetByte(void);
 
 
 #endif /* __EXT_GLCD_H */
