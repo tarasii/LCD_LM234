@@ -1,0 +1,751 @@
+#include "ext_glcd.h"
+
+
+const unsigned char tableGLCDChars[256][5] = {
+	
+	{0x00, 0x00, 0x00, 0x00, 0x00},
+	{0x00, 0x00, 0x5f, 0x00, 0x00}, //!
+	{0x00, 0x07, 0x00, 0x07, 0x00}, //"
+	{0x14, 0x7f, 0x14, 0x7f, 0x14}, //#
+	{0x24, 0x2a, 0x7f, 0x2a, 0x12}, //$
+	{0x23, 0x13, 0x08, 0x64, 0x62}, //%
+	{0x36, 0x49, 0x55, 0x22, 0x50}, //&
+	{0x00, 0x05, 0x03, 0x00, 0x00}, //'
+	{0x00, 0x1c, 0x22, 0x41, 0x00}, //(
+	{0x00, 0x41, 0x22, 0x1c, 0x00}, //)
+	{0x14, 0x08, 0x3e, 0x08, 0x14}, //*
+	{0x08, 0x08, 0x3e, 0x08, 0x08}, //+
+	{0x00, 0x50, 0x30, 0x00, 0x00}, //,
+	{0x08, 0x08, 0x08, 0x08, 0x08}, //-
+	{0x00, 0x60, 0x60, 0x00, 0x00}, //.
+	{0x20, 0x10, 0x08, 0x04, 0x02}, ///
+	{0x3e, 0x51, 0x49, 0x45, 0x3e}, //0
+	{0x00, 0x42, 0x7f, 0x40, 0x00}, //1
+	{0x42, 0x61, 0x51, 0x49, 0x46}, //2
+	{0x21, 0x41, 0x45, 0x4b, 0x31}, //3
+	{0x18, 0x14, 0x12, 0x7f, 0x10}, //4
+	{0x27, 0x45, 0x45, 0x45, 0x39}, //5
+	{0x3c, 0x4a, 0x49, 0x49, 0x30}, //6
+	{0x01, 0x71, 0x09, 0x05, 0x03}, //7
+	{0x36, 0x49, 0x49, 0x49, 0x36}, //8
+	{0x06, 0x49, 0x49, 0x29, 0x1e}, //9
+	{0x00, 0x36, 0x36, 0x0 , 0x0 }, //:
+	{0x0 , 0x56, 0x36, 0x0 , 0x0 }, //;
+	{0x08, 0x14, 0x22, 0x41, 0x0 }, //<
+	{0x14, 0x14, 0x14, 0x14, 0x14}, //=
+	{0x41, 0x22, 0x14, 0x08, 0x0 }, //>
+	{0x02, 0x01, 0x51, 0x09, 0x06}, //?
+	
+	{0x32, 0x49, 0x79, 0x41, 0x3e}, //@
+	{0x7e, 0x11, 0x11, 0x11, 0x7e}, //A
+	{0x7f, 0x49, 0x49, 0x49, 0x36}, //B
+	{0x3e, 0x41, 0x41, 0x41, 0x22}, //C
+	{0x7f, 0x41, 0x41, 0x22, 0x1c}, //D
+	{0x7f, 0x49, 0x49, 0x49, 0x41}, //E
+	{0x7f, 0x09, 0x09, 0x09, 0x01}, //F
+	{0x3e, 0x41, 0x49, 0x49, 0x7a}, //G
+	{0x7f, 0x08, 0x08, 0x08, 0x7f}, //H
+	{0x00, 0x41, 0x7f, 0x41, 0x00}, //I
+	{0x20, 0x40, 0x41, 0x3f, 0x01}, //J
+	{0x7f, 0x08, 0x14, 0x22, 0x41}, //K
+	{0x7f, 0x40, 0x40, 0x40, 0x40}, //L
+	{0x7f, 0x02, 0x0c, 0x02, 0x7f}, //M
+	{0x7f, 0x04, 0x08, 0x10, 0x7f}, //N
+	{0x3e, 0x41, 0x41, 0x41, 0x3e}, //O
+	{0x7f, 0x09, 0x09, 0x09, 0x06}, //P
+	{0x3e, 0x41, 0x51, 0x21, 0x5e}, //Q
+	{0x7f, 0x09, 0x19, 0x29, 0x46}, //R
+	{0x46, 0x49, 0x49, 0x49, 0x31}, //S
+	{0x01, 0x01, 0x7f, 0x01, 0x01}, //T
+	{0x3f, 0x40, 0x40, 0x40, 0x3f}, //U
+	{0x1f, 0x20, 0x40, 0x20, 0x1f}, //V
+	{0x3f, 0x40, 0x38, 0x40, 0x3f}, //W
+	{0x63, 0x14, 0x08, 0x14, 0x63}, //X
+	{0x07, 0x08, 0x70, 0x08, 0x07}, //Y
+	{0x61, 0x51, 0x49, 0x45, 0x43}, //Z
+	{0x00, 0x7f, 0x41, 0x41, 0x00}, //[
+	{0x02, 0x04, 0x08, 0x10, 0x20}, //"\" 
+	{0x00, 0x41, 0x41, 0x7f, 0x00}, //]
+	{0x04, 0x02, 0x01, 0x02, 0x04}, //^
+	{0x40, 0x40, 0x40, 0x40, 0x40}, //_
+	
+	{0x00, 0x01, 0x02, 0x00, 0x00}, //`
+	{0x20, 0x54, 0x54, 0x54, 0x78}, //a
+	{0x7f, 0x48, 0x44, 0x44, 0x38}, //b
+	{0x38, 0x44, 0x44, 0x44, 0x20}, //c
+	{0x38, 0x44, 0x44, 0x48, 0x7f}, //d
+	{0x38, 0x54, 0x54, 0x54, 0x18}, //e
+	{0x08, 0x7e, 0x09, 0x01, 0x02}, //f
+	{0x08, 0x54, 0x54, 0x54, 0x3c}, //g
+	{0x7f, 0x08, 0x04, 0x04, 0x78}, //h
+	{0x00, 0x44, 0x7d, 0x40, 0x00}, //i
+	{0x20, 0x40, 0x44, 0x3d, 0x00}, //j
+	{0x7f, 0x10, 0x28, 0x44, 0x00}, //k
+	{0x00, 0x41, 0x7f, 0x40, 0x00}, //l
+	{0x7c, 0x04, 0x18, 0x04, 0x78}, //m
+	{0x7c, 0x08, 0x04, 0x04, 0x78}, //n
+	{0x38, 0x44, 0x44, 0x44, 0x38}, //o	
+	{0x7c, 0x14, 0x14, 0x14, 0x08}, //p
+	{0x08, 0x14, 0x14, 0x14, 0x7c}, //q
+	{0x7c, 0x08, 0x04, 0x04, 0x08}, //r
+	{0x48, 0x54, 0x54, 0x54, 0x20}, //s
+	{0x04, 0x3f, 0x44, 0x40, 0x20}, //t
+	{0x3c, 0x40, 0x40, 0x20, 0x7c}, //u
+	{0x1c, 0x20, 0x40, 0x20, 0x1c}, //v
+	{0x3c, 0x40, 0x30, 0x40, 0x3c}, //w
+	{0x44, 0x28, 0x10, 0x28, 0x44}, //x
+	{0x0c, 0x50, 0x50, 0x50, 0x3c}, //y
+	{0x44, 0x64, 0x54, 0x4c, 0x44}, //z
+	{0x00, 0x08, 0x36, 0x41, 0x00}, //{
+	{0x00, 0x00, 0x7F, 0x00, 0x00}, //|
+	{0x00, 0x41, 0x36, 0x08, 0x00}, //}
+	{0x08, 0x04, 0x08, 0x04, 0x00}, //~
+	{0x00, 0x00, 0x77, 0x00, 0x00}, //�
+
+
+	{0x7e, 0x11, 0x11, 0x11, 0x7f}, //�
+	{0x7f, 0x49, 0x49, 0x49, 0x31}, //�
+	{0x7f, 0x49, 0x49, 0x49, 0x31}, //�
+	{0x7f, 0x01, 0x01, 0x01, 0x03}, //�
+	{0x60, 0x3e, 0x23, 0x3f, 0x60}, //�
+	{0x7f, 0x49, 0x49, 0x49, 0x41}, //�
+	{0x77, 0x08, 0x7f, 0x08, 0x77}, //�
+	{0x41, 0x49, 0x49, 0x49, 0x36}, //�
+	{0x7f, 0x10, 0x08, 0x04, 0x7f}, //� 
+	{0x7f, 0x10, 0x09, 0x04, 0x7f}, //�
+	{0x7f, 0x08, 0x14, 0x22, 0x41}, //�
+	{0x20, 0x41, 0x3f, 0x01, 0x7f}, //�
+	{0x7f, 0x02, 0x0c, 0x02, 0x7f}, //�
+	{0x7f, 0x08, 0x08, 0x08, 0x7f}, //�
+	{0x3e, 0x41, 0x41, 0x41, 0x3e}, //�
+	{0x7f, 0x01, 0x01, 0x01, 0x7f}, //�
+	{0x7f, 0x09, 0x09, 0x09, 0x06}, //�
+	{0x3e, 0x41, 0x41, 0x41, 0x22}, //�
+	{0x01, 0x01, 0x7f, 0x01, 0x01}, //�
+	{0x47, 0x28, 0x10, 0x08, 0x07}, //�
+	{0x0e, 0x11, 0x7f, 0x11, 0x0e}, //�
+	{0x63, 0x14, 0x08, 0x14, 0x63}, //�
+	{0x3f, 0x20, 0x20, 0x20, 0x7f}, //�
+	{0x07, 0x08, 0x08, 0x08, 0x7f}, //�
+	{0x7f, 0x40, 0x7f, 0x40, 0x7f}, //�
+	{0x3f, 0x20, 0x3f, 0x20, 0x7f}, //�
+	{0x01, 0x7f, 0x48, 0x48, 0x30}, //�
+	{0x7f, 0x48, 0x30, 0x00, 0x7f}, //�
+	{0x7f, 0x48, 0x48, 0x48, 0x30}, //�
+	{0x22, 0x41, 0x49, 0x49, 0x3e}, //� 
+	{0x7f, 0x08, 0x3e, 0x41, 0x3e}, //�
+	{0x46, 0x29, 0x19, 0x09, 0x7f}, //�
+
+
+	{0x20, 0x54, 0x54, 0x54, 0x78}, //�
+	{0x3c, 0x4a, 0x4a, 0x49, 0x31}, //�
+	{0x7c, 0x54, 0x54, 0x58, 0x20}, //�
+	{0x7c, 0x04, 0x04, 0x04, 0x0c}, //�
+	{0x60, 0x3c, 0x24, 0x3c, 0x60}, //�
+	{0x38, 0x54, 0x54, 0x54, 0x18}, //�
+	{0x6c, 0x10, 0x7c, 0x10, 0x6c}, //�
+	{0x44, 0x54, 0x54, 0x54, 0x28}, //�
+	{0x7c, 0x20, 0x10, 0x08, 0x7c}, //�
+	{0x7c, 0x22, 0x14, 0x0a, 0x7c}, //�
+	{0x7c, 0x10, 0x28, 0x44, 0x00}, //�
+	{0x40, 0x38, 0x04, 0x04, 0x7c}, //�
+	{0x7c, 0x08, 0x10, 0x08, 0x7c}, //�
+	{0x7c, 0x10, 0x10, 0x10, 0x7c}, //�
+	{0x38, 0x44, 0x44, 0x44, 0x38}, //�
+	{0x7c, 0x04, 0x04, 0x04, 0x7c}, //�
+	{0x7c, 0x14, 0x14, 0x14, 0x08}, //�
+	{0x38, 0x44, 0x44, 0x44, 0x28}, //�
+	{0x0c, 0x04, 0x7c, 0x04, 0x0c}, //�
+	{0x44, 0x28, 0x10, 0x08, 0x04}, //�
+	{0x10, 0x28, 0x7c, 0x28, 0x10}, //�
+	{0x44, 0x28, 0x10, 0x28, 0x44}, //�
+	{0x3c, 0x20, 0x20, 0x20, 0x7c}, //�
+	{0x1c, 0x10, 0x10, 0x10, 0x7c}, //�
+	{0x7c, 0x40, 0x7c, 0x40, 0x7c}, //�
+	{0x3c, 0x20, 0x3c, 0x20, 0x7c}, //�
+	{0x04, 0x7c, 0x50, 0x50, 0x20}, //�
+	{0x7c, 0x50, 0x50, 0x20, 0x7c}, //�
+	{0x7c, 0x50, 0x50, 0x50, 0x20}, //�
+	{0x28, 0x44, 0x54, 0x54, 0x38}, //�
+	{0x7c, 0x10, 0x38, 0x44, 0x38}, //�
+	{0x48, 0x34, 0x14, 0x14, 0x7c}, //�
+
+	{0x06, 0x09, 0x09, 0x06, 0x00}, //�
+	};
+
+uint8_t curX;
+uint8_t curGX;
+uint8_t curY;
+
+void GLCD_Delay(uint16_t ntimes){
+	uint16_t i;
+	for (i=0;i<ntimes;i++){}
+}
+	
+void Pulse_E(void){
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_SET);	    //E=1
+	GLCD_Delay(100);
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_RESET);	//E=0
+	GLCD_Delay(100);
+}
+
+#define WriteCommonBit(v, bit)              \
+	if ((v) & (1 << bit))                   \
+		HAL_GPIO_WritePin(DATA_PORT, DATA_PIN##bit, GPIO_PIN_SET);\
+	else						            \
+		HAL_GPIO_WritePin(DATA_PORT, DATA_PIN##bit, GPIO_PIN_RESET);
+
+void WriteCommon(uint8_t value)
+{
+	
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = DATA_PIN0|DATA_PIN1|DATA_PIN2|DATA_PIN3
+	                   |DATA_PIN4|DATA_PIN5|DATA_PIN6|DATA_PIN7;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(DATA_PORT, &GPIO_InitStruct);
+
+  WriteCommonBit(value, 0);
+  WriteCommonBit(value, 1);
+  WriteCommonBit(value, 2);
+  WriteCommonBit(value, 3);
+  WriteCommonBit(value, 4);
+  WriteCommonBit(value, 5);
+  WriteCommonBit(value, 6);
+  WriteCommonBit(value, 7);
+
+  Pulse_E();
+}
+
+void SelectChip(uint8_t value){
+	if ((value&0x01) == 0x00){
+		HAL_GPIO_WritePin(CRSLC_PORT, CRSLC_PIN0, GPIO_PIN_RESET);
+	}
+	else{
+		HAL_GPIO_WritePin(CRSLC_PORT, CRSLC_PIN0, GPIO_PIN_SET);
+	}
+	if ((value&0x02) == 0x00){
+		HAL_GPIO_WritePin(CRSLC_PORT, CRSLC_PIN1, GPIO_PIN_RESET);
+	}
+	else{
+		HAL_GPIO_WritePin(CRSLC_PORT, CRSLC_PIN1, GPIO_PIN_SET);
+	}
+	if ((value&0x04) == 0x00){
+		HAL_GPIO_WritePin(CRSLC_PORT, CRSLC_PIN2, GPIO_PIN_RESET);
+	}
+	else{
+		HAL_GPIO_WritePin(CRSLC_PORT, CRSLC_PIN2, GPIO_PIN_SET);
+	}
+}
+
+void DelayBusy(void)
+{
+
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Pin = DATA_PIN7;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(DATA_PORT, &GPIO_InitStruct);
+
+    int busy_state = 1;
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RS, GPIO_PIN_RESET);	//RS=0
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RW, GPIO_PIN_SET);	//RW=1
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_SET);	    //E=1
+	while (busy_state){
+		busy_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN7);
+	}
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_RESET);	//E=0
+	
+}
+
+uint8_t ReadData(void)
+{
+	uint8_t res = 0;
+
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Pin = DATA_PIN0|DATA_PIN1|DATA_PIN2|DATA_PIN3
+            			 |DATA_PIN4|DATA_PIN5|DATA_PIN6|DATA_PIN7;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(DATA_PORT, &GPIO_InitStruct);
+
+    int state = 1;
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RS, GPIO_PIN_SET);	//RS=1
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RW, GPIO_PIN_SET);	//RW=1
+	//HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_SET);	    //E=1
+
+	Pulse_E();
+
+	res  = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN0);
+	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN1) << 1;
+	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN2) << 2;
+	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN3) << 3;
+	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN4) << 4;
+	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN5) << 5;
+	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN6) << 6;
+	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN7) << 7;
+
+	//HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_RESET);	//E=0
+
+	return res;
+
+}
+
+
+
+void WriteCtrl(uint8_t  value){
+  HAL_GPIO_WritePin(CTRL_PORT, CTRL_RS, GPIO_PIN_RESET);	//RS=0
+  HAL_GPIO_WritePin(CTRL_PORT, CTRL_RW, GPIO_PIN_RESET);	//RW=0
+  WriteCommon( value );
+  DelayBusy();
+}
+
+void WriteData(uint8_t value)
+{
+  HAL_GPIO_WritePin(CTRL_PORT, CTRL_RS, GPIO_PIN_SET);	    //RS=1
+  HAL_GPIO_WritePin(CTRL_PORT, CTRL_RW, GPIO_PIN_RESET);	//RW=0
+  WriteCommon( value );
+  DelayBusy();
+}
+
+
+void GLCD_ON(void)
+{
+	WriteCtrl(0x039);
+}
+
+void GLCD_OFF(void)
+{
+	WriteCtrl(0x038);
+}
+
+void ClearScreen(void)
+{
+	for(uint8_t k = 0; k < 4; k++){
+		WriteCtrl(k * 0x40);
+		for(uint8_t j = 0; j < 0x32; j++){
+			WriteData(0x0);
+		}
+	}	
+}
+
+void ClearFullScreen(void)
+{
+	for(uint8_t i = 0; i < 4; i++)
+	{
+		SelectChip(i);
+	
+		GLCD_OFF();
+		ClearScreen();
+		GLCD_ON();
+	}	
+}
+
+void Init_GLCD_CTRL_GPIOs(void)
+{
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = CRSLC_PIN0 | CRSLC_PIN1| CRSLC_PIN2;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(CRSLC_PORT, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin =  CTRL_E | CTRL_RW | CTRL_RS;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(CTRL_PORT, &GPIO_InitStruct);
+
+}
+
+void Init_Ext_GLCD(void)
+{
+
+	Init_GLCD_CTRL_GPIOs();
+
+	for(uint8_t i = 0; i < 4; i++)
+	{
+		//WriteCtrl(0x3F); 
+		SelectChip(i);
+	
+		GLCD_OFF();
+		
+		//WriteCtrl(0x3A); //down mode (right to left)
+		WriteCtrl(0x3B); //up mode (left to right)
+		WriteCtrl(0x3E); //start page
+
+		ClearScreen();
+		
+		GLCD_ON();
+	}
+}
+
+void TestScreen(uint8_t value)
+{
+	for(uint8_t i = 0; i < 4; i++)
+	{
+		SelectChip(i);
+		for(uint8_t k = 0; k < 4; k++)
+		{
+			WriteCtrl(k * 0x40);
+			for(uint8_t j = 0; j < 0x32; j++)
+			{
+				WriteData(value);
+			}
+		}
+	}
+}
+
+void TestNetScreen(void)
+{
+	for(uint8_t i = 0; i < 4; i++)
+	{
+		SelectChip(i);
+		for(uint8_t k = 0; k < 4; k++)
+		{
+			WriteCtrl(k * 0x40);
+			for(uint8_t j = 0; j < 0x32; j++)
+			{
+				if ((j & 0x01) == 0x00)
+				{
+					WriteData(0x55);
+				}
+				else
+				{
+					WriteData(0x2a);
+				}
+
+			}
+		}
+	}
+}
+
+void TestChars(void)
+{
+	uint8_t x = 0;
+	for (uint8_t i = 0x21; i < 0xC1; i++){
+
+		if ((curX+x) == 10){
+			GotoXY(10, curY);
+			x = 0;
+		} else if ((curX+x) == 20){
+			GotoXY(0, curY+1);			
+			x = 0;
+		}
+
+		for (uint8_t j = 0; j < 5; j++){
+			WriteData(tableGLCDChars[i-32][j]);
+		}
+		//PutChar(i);
+		x++;
+	}
+}
+
+
+void PutChar(uint8_t value){
+	uint8_t mv = 0;
+	
+	if (value == 0xB0) {
+		mv = 0xA0;
+	}
+	else if (value >= 0xE0) {
+		mv = value - 0x60;
+	}
+	else {
+		mv = value - 0x20;
+	}
+	
+	for (uint8_t i = 0; i < 5; i++){
+		WriteData(tableGLCDChars[mv][i]);
+	}
+}
+
+void GotoXY(uint8_t x, uint8_t y)
+{
+	GotoGXY(x * 5, y);
+}
+
+
+void ScrollLine(uint8_t ln)
+{
+	//
+	curY = ln;
+	curX = 0;
+	GotoXY(curX, curY);
+
+	uint8_t tmp[51];
+	int i;
+	for (i = 0; i < 51; i++)
+		tmp[i] = ReadData();
+
+	curY = ln-1;
+	curX = 0;
+	GotoXY(curX, curY);
+
+	for (i = 1; i < 51; i++)
+		WriteData(tmp[i]);
+
+	curY = ln;
+	curX = 10;
+	GotoXY(curX, curY);
+	for (i = 0; i < 51; i++)
+		tmp[i] = ReadData();
+
+	curY = ln-1;
+	curX = 10;
+	GotoXY(curX, curY);
+
+	for (i = 1; i < 51; i++)
+		WriteData(tmp[i]);
+
+	//ClearFullScreen();
+}
+
+void ScrollScreen()
+{
+	//
+	int i;
+	for (i = 1; i < 8; i++)
+		ScrollLine(i);
+
+	curY = 7;
+	curX = 0;
+	GotoXY(curX, curY);
+
+	for (i = 0; i < 50; i++)
+		WriteData(0x00);
+
+	curY = 7;
+	curX = 10;
+	GotoXY(curX, curY);
+
+	for (i = 0; i < 50; i++)
+		WriteData(0x00);
+
+	//ClearFullScreen();
+}
+
+void WrapPutChar(uint8_t ch)
+{
+	if( !ch ) return;
+	if (curX == 10)
+	{
+		GotoXY(10, curY);
+	} else if (curX == 20){
+		curY++;
+		curX = 0;
+		GotoXY(0, curY);
+		printf("\r\n"); //new line in terminal
+	}
+	if (ch == 13)
+	{
+		curY++;
+	}
+	if (curY >= 8){
+
+		ScrollScreen();
+
+		curY = 7;
+		curX = 0;
+		GotoXY(curX, curY);
+
+	}
+	if (ch == 13)
+	{
+		curX = 0;
+		GotoXY(0, curY);
+		return;
+	}
+	PutChar(ch);
+	curX++;
+
+}
+
+void WrapWrite_GLCD(uint8_t* message)
+{
+	uint8_t x = 0, mx;
+	mx = 160 - curX - curY * 20;
+	for(uint8_t i = 0; i < mx; i++)
+	{
+		if ((curX + x) == 10)
+		{
+			GotoXY(10, curY);
+			x = 0;
+		} else if ((curX + x) == 20){
+			GotoXY(0, curY + 1);
+			x = 0;
+		}
+		if( !message[i] ) break;
+		PutChar(message[i]);
+		x++;
+	}
+}
+
+void Write_GLCD(uint8_t* message)
+{
+	uint8_t mx = 20 - curX;
+	for(uint8_t i=0; i < mx; i++){
+		if ((curX + i) == 10){
+			GotoXY(10, curY);
+		} 
+		if( !message[i] ) break;
+		PutChar(message[i]);
+	}
+}
+
+void TestScroll(void)
+{
+	uint8_t i, j;
+
+	unsigned char zz[20]={' ',' ',' ',' ','*',' ',' ',' ',' ','*',' ',' ',' ',' ','*',' ',' ',' ',' ','*'};
+	
+	GotoXY(0, 0);
+	for (j = 0; j < 10; j++){
+		for (i = 0; i < 10; i++){
+			PutChar(zz[i + j]);
+		}
+	}
+}
+
+void GotoGXY(uint8_t gx, uint8_t y){
+  curY = y;
+  curGX = gx;
+  curX = gx / 5;
+  if ((gx > 49)&&(y > 3)) {
+		SelectChip(3);
+		gx -=50;
+		y -=4;
+		}
+	else		
+  if ((gx > 49)&&(y < 4)) {
+		SelectChip(1);
+		gx -=50;
+	}
+	else
+  if ((gx < 50)&&(y > 3)) {
+		SelectChip(2);
+		y -=4;
+	}
+	else
+  if ((gx < 50)&&(y < 4)) {
+		SelectChip(0);
+	}
+	WriteCtrl(y * 0x40 + gx);
+}
+
+uint8_t GetByte(void){
+
+	uint8_t byte_state;
+	uint8_t res_byte;
+	
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Pin = DATA_PIN0|DATA_PIN1|DATA_PIN2|DATA_PIN3
+		                   |DATA_PIN4|DATA_PIN5|DATA_PIN6|DATA_PIN7;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(DATA_PORT, &GPIO_InitStruct);
+
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RS, GPIO_PIN_SET);	//RS=1
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RW, GPIO_PIN_SET);	//RW=1
+
+	GLCD_Delay(100);
+
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_SET);	//E=1
+	GLCD_Delay(100);
+	
+	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN0);
+	res_byte = byte_state;
+	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN1);
+	res_byte += byte_state*0x02;
+	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN2);
+	res_byte += byte_state*0x04;
+	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN3);
+	res_byte += byte_state*0x08;
+	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN4);
+	res_byte += byte_state*0x10;
+	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN5);
+	res_byte += byte_state*0x20;
+	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN6);
+	res_byte += byte_state*0x40;
+	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN7);
+	res_byte += byte_state*0x80;
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_RESET);	//E=0
+
+	DelayBusy();
+	
+	return res_byte;
+}
+
+uint8_t GetByteXY(uint8_t gx, uint8_t y){
+	uint8_t byte_state;
+	GotoGXY(gx, y);
+	byte_state = GetByte();
+	byte_state = GetByte();
+	return byte_state;
+ }
+
+void PutByte(uint8_t gx, uint8_t y, uint8_t pb){
+	GotoGXY(gx, y);
+	WriteData(pb);
+}
+
+void PutPixel(uint8_t gx, uint8_t gy)
+{
+	uint8_t y;
+	uint8_t nbit;
+	uint8_t lcd_byte;
+
+	y = gy / 8;
+	nbit = gy - y * 8;
+	lcd_byte = GetByteXY(gx,y);
+	GotoGXY(gx, y);
+	lcd_byte |= 1 << nbit;
+	WriteData(lcd_byte);
+}
+
+int abs(int x){
+	int res;
+	if(x<0){res=-x;}
+	else {res = x;}
+	return res;
+}
+
+void drawLine(int x1, int y1, int x2, int y2) {
+    const int deltaX = abs(x2 - x1);
+    const int deltaY = abs(y2 - y1);
+    const int signX = x1 < x2 ? 1 : -1;
+    const int signY = y1 < y2 ? 1 : -1;
+    //
+    int error = deltaX - deltaY;
+		int error2;
+    //
+    PutPixel(x2, y2);
+    while(x1 != x2 || y1 != y2) {
+        PutPixel(x1, y1);
+        error2 = error * 2;
+        //
+        if(error2 > -deltaY) {
+            error -= deltaY;
+            x1 += signX;
+        }
+        if(error2 < deltaX) {
+            error += deltaX;
+            y1 += signY;
+        }
+    }
+ 
+}
+
+void Rectangle(int x1, int y1, int x2, int y2) {
+	drawLine(x1, y1, x2, y1);
+	drawLine(x2, y1, x2, y2);
+	drawLine(x1, y2, x2, y2);
+	drawLine(x1, y1, x1, y2);
+}
+
+
