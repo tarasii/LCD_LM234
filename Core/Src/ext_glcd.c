@@ -260,41 +260,6 @@ void DelayBusy(void)
 	
 }
 
-uint8_t ReadData(void)
-{
-	uint8_t res = 0;
-
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-	GPIO_InitStruct.Pin = DATA_PIN0|DATA_PIN1|DATA_PIN2|DATA_PIN3
-            			 |DATA_PIN4|DATA_PIN5|DATA_PIN6|DATA_PIN7;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(DATA_PORT, &GPIO_InitStruct);
-
-    int state = 1;
-	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RS, GPIO_PIN_SET);	//RS=1
-	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RW, GPIO_PIN_SET);	//RW=1
-	//HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_SET);	    //E=1
-
-	Pulse_E();
-
-	res  = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN0);
-	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN1) << 1;
-	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN2) << 2;
-	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN3) << 3;
-	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN4) << 4;
-	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN5) << 5;
-	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN6) << 6;
-	res |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN7) << 7;
-
-	//HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_RESET);	//E=0
-
-	return res;
-
-}
-
-
 
 void WriteCtrl(uint8_t  value){
   HAL_GPIO_WritePin(CTRL_PORT, CTRL_RS, GPIO_PIN_RESET);	//RS=0
@@ -309,6 +274,55 @@ void WriteData(uint8_t value)
   HAL_GPIO_WritePin(CTRL_PORT, CTRL_RW, GPIO_PIN_RESET);	//RW=0
   WriteCommon( value );
   DelayBusy();
+}
+
+uint8_t GetByte(void){
+
+	uint8_t res_byte;
+
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Pin = DATA_PIN0|DATA_PIN1|DATA_PIN2|DATA_PIN3
+		                   |DATA_PIN4|DATA_PIN5|DATA_PIN6|DATA_PIN7;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(DATA_PORT, &GPIO_InitStruct);
+
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RS, GPIO_PIN_SET);	//RS=1
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RW, GPIO_PIN_SET);	//RW=1
+
+	GLCD_Delay(100);
+
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_SET);	//E=1
+	GLCD_Delay(100);
+
+	res_byte  = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN0);
+	res_byte |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN1) << 1;
+	res_byte |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN2) << 2;
+	res_byte |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN3) << 3;
+	res_byte |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN4) << 4;
+	res_byte |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN5) << 5;
+	res_byte |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN6) << 6;
+	res_byte |= HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN7) << 7;
+
+	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_RESET);	//E=0
+
+	DelayBusy();
+
+	return res_byte;
+}
+
+uint8_t GetByteXY(uint8_t gx, uint8_t y){
+	uint8_t byte_state;
+	GotoGXY(gx, y);
+	byte_state = GetByte();
+	byte_state = GetByte();
+	return byte_state;
+ }
+
+void PutByte(uint8_t gx, uint8_t y, uint8_t pb){
+	GotoGXY(gx, y);
+	WriteData(pb);
 }
 
 
@@ -472,61 +486,45 @@ void GotoXY(uint8_t x, uint8_t y)
 
 void ScrollLine(uint8_t ln)
 {
-	//
-	curY = ln;
-	curX = 0;
-	GotoXY(curX, curY);
+	uint8_t tmp[LNLEN + 1];
+	int i, j;
 
-	uint8_t tmp[51];
-	int i;
-	for (i = 0; i < 51; i++)
-		tmp[i] = ReadData();
+	for (j = 0; j < 2; j++)
+	{
+		curY = ln;
+		curX = j * 10;
+		GotoXY(curX, curY);
 
-	curY = ln-1;
-	curX = 0;
-	GotoXY(curX, curY);
+		for (i = 0; i < LNLEN + 1; i++)
+			//tmp[i] = ReadData();
+			tmp[i] = GetByte();
 
-	for (i = 1; i < 51; i++)
-		WriteData(tmp[i]);
+		curY = ln-1;
+		curX = j * 10;
+		GotoXY(curX, curY);
 
-	curY = ln;
-	curX = 10;
-	GotoXY(curX, curY);
-	for (i = 0; i < 51; i++)
-		tmp[i] = ReadData();
+		for (i = 1; i < LNLEN + 1; i++)
+			WriteData(tmp[i]);
+	}
 
-	curY = ln-1;
-	curX = 10;
-	GotoXY(curX, curY);
-
-	for (i = 1; i < 51; i++)
-		WriteData(tmp[i]);
-
-	//ClearFullScreen();
 }
 
 void ScrollScreen()
 {
 	//
-	int i;
+	int i, j;
 	for (i = 1; i < 8; i++)
 		ScrollLine(i);
 
-	curY = 7;
-	curX = 0;
-	GotoXY(curX, curY);
+	for (j = 0; j < 2; j++)
+	{
+		curY = 7;
+		curX = j * 10;
+		GotoXY(curX, curY);
 
-	for (i = 0; i < 50; i++)
-		WriteData(0x00);
-
-	curY = 7;
-	curX = 10;
-	GotoXY(curX, curY);
-
-	for (i = 0; i < 50; i++)
-		WriteData(0x00);
-
-	//ClearFullScreen();
+		for (i = 0; i <= LNLEN; i++)
+			WriteData(0x00);
+	}
 }
 
 void WrapPutChar(uint8_t ch)
@@ -615,84 +613,28 @@ void GotoGXY(uint8_t gx, uint8_t y){
   curY = y;
   curGX = gx;
   curX = gx / 5;
-  if ((gx > 49)&&(y > 3)) {
+  if ((gx > LNLEN - 1)&&(y > 3)) {
 		SelectChip(3);
-		gx -=50;
-		y -=4;
+		gx -= LNLEN;
+		y -= 4;
 		}
 	else		
-  if ((gx > 49)&&(y < 4)) {
+  if ((gx > LNLEN - 1)&&(y < 4)) {
 		SelectChip(1);
-		gx -=50;
+		gx -= LNLEN;
 	}
 	else
-  if ((gx < 50)&&(y > 3)) {
+  if ((gx < LNLEN)&&(y > 3)) {
 		SelectChip(2);
 		y -=4;
 	}
 	else
-  if ((gx < 50)&&(y < 4)) {
+  if ((gx < LNLEN)&&(y < 4)) {
 		SelectChip(0);
 	}
 	WriteCtrl(y * 0x40 + gx);
 }
 
-uint8_t GetByte(void){
-
-	uint8_t byte_state;
-	uint8_t res_byte;
-	
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-	GPIO_InitStruct.Pin = DATA_PIN0|DATA_PIN1|DATA_PIN2|DATA_PIN3
-		                   |DATA_PIN4|DATA_PIN5|DATA_PIN6|DATA_PIN7;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(DATA_PORT, &GPIO_InitStruct);
-
-	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RS, GPIO_PIN_SET);	//RS=1
-	HAL_GPIO_WritePin(CTRL_PORT, CTRL_RW, GPIO_PIN_SET);	//RW=1
-
-	GLCD_Delay(100);
-
-	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_SET);	//E=1
-	GLCD_Delay(100);
-	
-	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN0);
-	res_byte = byte_state;
-	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN1);
-	res_byte += byte_state*0x02;
-	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN2);
-	res_byte += byte_state*0x04;
-	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN3);
-	res_byte += byte_state*0x08;
-	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN4);
-	res_byte += byte_state*0x10;
-	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN5);
-	res_byte += byte_state*0x20;
-	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN6);
-	res_byte += byte_state*0x40;
-	byte_state = HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN7);
-	res_byte += byte_state*0x80;
-	HAL_GPIO_WritePin(CTRL_PORT, CTRL_E, GPIO_PIN_RESET);	//E=0
-
-	DelayBusy();
-	
-	return res_byte;
-}
-
-uint8_t GetByteXY(uint8_t gx, uint8_t y){
-	uint8_t byte_state;
-	GotoGXY(gx, y);
-	byte_state = GetByte();
-	byte_state = GetByte();
-	return byte_state;
- }
-
-void PutByte(uint8_t gx, uint8_t y, uint8_t pb){
-	GotoGXY(gx, y);
-	WriteData(pb);
-}
 
 void PutPixel(uint8_t gx, uint8_t gy)
 {
